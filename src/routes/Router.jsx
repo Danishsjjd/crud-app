@@ -16,15 +16,20 @@ import View from "../pages/View";
 
 export default function Router() {
 	const dispatch = useDispatch();
+	const isLogin = useSelector((state) => state.authSlice.isLogin);
+
 	useEffect(() => {
+		
 		onAuthStateChanged(auth, (user) => {
 			if (user) {
 				dispatch(setIsLogin(true));
 				dispatch(setUserData(user));
+			} else {
+				dispatch(setIsLogin(false));
+				dispatch(setUserData({}));
 			}
 		});
 	}, []);
-	const isLogin = useSelector((state) => state.authSlice.isLogin);
 	return (
 		<BrowserRouter>
 			{isLogin && <Header />}
@@ -47,6 +52,14 @@ export default function Router() {
 				/>
 				<Route
 					path="/update/:id"
+					element={
+						<PrivateRoutes isLogin={isLogin}>
+							<AddEdit />
+						</PrivateRoutes>
+					}
+				/>
+				<Route
+					path="/update"
 					element={
 						<PrivateRoutes isLogin={isLogin}>
 							<AddEdit />

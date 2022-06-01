@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const authSLice = createSlice({
 	name: "authSlice",
 	initialState: {
-		isLogin: false,
+		isLogin: localStorage.getItem("isLogin") == null ? false : true,
 		userData: {},
 	},
 	reducers: {
@@ -11,6 +11,7 @@ const authSLice = createSlice({
 			state.userData = action.payload;
 		},
 		setIsLogin: (state, action) => {
+			localStorage.setItem("isLogin", action.payload);
 			state.isLogin = action.payload;
 		},
 	},

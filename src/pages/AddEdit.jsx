@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import { toast } from "react-toastify";
 import { Form, Button } from "react-bootstrap";
 import { database } from "../config/firebase";
 import { ref, push, get, set } from "firebase/database";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function AddEdit() {
-	const { id } = useParams();
-	const [data, setData] = useState({});
+	const { state: navigateState } = useLocation();
+
+	const navId = navigateState?.id;
+
 	const navigate = useNavigate();
 	const userId = useSelector((state) => state.authSlice.userData.uid);
 	const initialState = {
@@ -26,7 +28,7 @@ export default function AddEdit() {
 		e.preventDefault();
 		if (!name || !rollNo || !contact)
 			return toast.error("Please Enter All the fields");
-		if (!id) {
+		if (!navId) {
 			const reference = ref(database, "contacts/" + userId);
 			push(reference, state)
 				.then(() => {
@@ -36,7 +38,7 @@ export default function AddEdit() {
 					toast.error(error.message);
 				});
 		} else {
-			const reference = ref(database, "contacts/" + userId + "/" + id);
+			const reference = ref(database, "contacts/" + userId + "/" + navId);
 			set(reference, state)
 				.then(() => {
 					navigate("/");
@@ -46,23 +48,22 @@ export default function AddEdit() {
 				});
 		}
 	};
-	useEffect(() => {
-		const reference = ref(database, "contacts/" + userId);
-		get(reference).then((dataForUpdate) => {
-			if (dataForUpdate.exists) setData(dataForUpdate.val());
-			else {
-				setData({});
-			}
-		});
-	}, [id]);
 
-	useEffect(() => {
-		if (id) {
-			setState(data[id]);
-		} else {
-			setState(initialState);
+	useLayoutEffect(() => {
+		if (navId) {
+			const {
+				name: navName,
+				rollNo: navRollNo,
+				contact: navContact,
+			} = navigateState;
+			setState({
+				name: navName,
+				rollNo: navRollNo,
+				contact: navContact,
+			});
 		}
-	}, [id, data]);
+	}, [navId]);
+
 	return (
 		<div className="styled_form">
 			<Form>
@@ -71,7 +72,7 @@ export default function AddEdit() {
 					<Form.Control
 						type="text"
 						placeholder="Name"
-						value={name|| ""}
+						value={name || ""}
 						name="name"
 						onChange={onChangeHandler}
 					/>
@@ -81,7 +82,7 @@ export default function AddEdit() {
 					<Form.Control
 						type="number"
 						placeholder="Roll No"
-						value={rollNo|| ""}
+						value={rollNo || ""}
 						name="rollNo"
 						onChange={onChangeHandler}
 					/>
@@ -91,7 +92,7 @@ export default function AddEdit() {
 					<Form.Control
 						type="text"
 						placeholder="Contact"
-						value={contact|| ""}
+						value={contact || ""}
 						name="contact"
 						onChange={onChangeHandler}
 					/>
@@ -101,7 +102,7 @@ export default function AddEdit() {
 					type="submit"
 					onClick={(e) => submitHandler(e)}
 				>
-					{id ? "Update" : "Save"}
+					{navId ? "Update" : "Save"}
 				</Button>
 			</Form>
 		</div>

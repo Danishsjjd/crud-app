@@ -4,16 +4,21 @@ import { onValue, ref, remove } from "firebase/database";
 import { useSelector } from "react-redux";
 import { Table, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Home() {
+	const navigate = useNavigate();
+	const userData = useSelector(state => state.authSlice.userData)
 	const [data, setData] = useState({});
 	const userId = useSelector((state) => state.authSlice.userData.uid);
 	useEffect(() => {
 		onValue(ref(database, "contacts/" + userId), (snapshot) => {
 			if (snapshot.exists) setData({ ...snapshot.val() });
 		});
-	}, []);
+		return () =>{
+			setData({})
+		}
+	}, [userData]);
 	const finalData = Object.keys(data);
 	const deleteHandler = (id) => {
 		remove(ref(database, "contacts/" + userId + "/" + id))
@@ -52,16 +57,15 @@ export default function Home() {
 										>
 											Delete
 										</Button>
-										<Button variant="success">
-											<Link
-												to={`update/${id}`}
-												style={{
-													color: "inherit",
-													textDecoration: "none",
-												}}
-											>
-												Update
-											</Link>
+										<Button
+											variant="success"
+											onClick={() =>
+												navigate("/update", {
+													state: { ...data[id], id: id },
+												})
+											}
+										>
+											Update
 										</Button>
 										<Button variant="secondary">
 											<Link
