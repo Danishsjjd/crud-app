@@ -2,7 +2,7 @@ import React, { useEffect, useState, useLayoutEffect } from "react";
 import { toast } from "react-toastify";
 import { Form, Button } from "react-bootstrap";
 import { database } from "../config/firebase";
-import { ref, push, get, set } from "firebase/database";
+import { ref, push, set } from "firebase/database";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
